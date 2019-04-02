@@ -8,6 +8,7 @@ import java.util.Date;
 
 public class RegistroBD implements PropertyChangeListener {
 
+	private String bd;
 	private String usuario;
 	private String tipoConsulta;
 	private String sentencia;
@@ -18,14 +19,20 @@ public class RegistroBD implements PropertyChangeListener {
 
 	}
 
-	public RegistroBD(String usuario, String tipoConsulta, String sentencia, Calendar fechaConsulta,
+	public RegistroBD(String bd,String usuario, String tipoConsulta, String sentencia, Calendar fechaConsulta,
 			int numeroRegistros) {
-		super();
+		this.bd=bd;
 		this.usuario = usuario;
 		this.tipoConsulta = tipoConsulta;
 		this.sentencia = sentencia;
 		this.fechaConsulta = fechaConsulta;
 		this.numeroRegistros = numeroRegistros;
+	}
+	
+	
+
+	public String getBd() {
+		return bd;
 	}
 
 	public String getUsuario() {
@@ -48,6 +55,10 @@ public class RegistroBD implements PropertyChangeListener {
 		return numeroRegistros;
 	}
 
+	public void setBd(String bd) {
+		this.bd = bd;
+	}
+	
 	public void setUsuario(String usuario) {
 		this.usuario = usuario;
 	}
@@ -70,11 +81,11 @@ public class RegistroBD implements PropertyChangeListener {
 
 	@Override
 	public String toString() {
-		return "RegistroBD [usuario= " + usuario + ", tipoConsulta= " + tipoConsulta + ", sentencia= " + sentencia
-				+ ", fechaConsulta= " + fechaConsulta.get(Calendar.DAY_OF_MONTH) + "/" + fechaConsulta.get(Calendar.MONTH) + "/"
-				+ fechaConsulta.get(Calendar.YEAR)+" "+ fechaConsulta.get(Calendar.HOUR_OF_DAY) + ":"
-				+ fechaConsulta.get(Calendar.MINUTE) + ":" + fechaConsulta.get(Calendar.SECOND) + " "
-				+ ", numeroRegistros= " + numeroRegistros + "]";
+		return "RegistroBD [database= "+bd+", usuario= " + usuario + ", tipoConsulta= " + tipoConsulta + ", sentencia= " + sentencia
+				+ ", fechaConsulta= " + fechaConsulta.get(Calendar.DAY_OF_MONTH) + "/"
+				+ fechaConsulta.get(Calendar.MONTH) + "/" + fechaConsulta.get(Calendar.YEAR) + " "
+				+ fechaConsulta.get(Calendar.HOUR_OF_DAY) + ":" + fechaConsulta.get(Calendar.MINUTE) + ":"
+				+ fechaConsulta.get(Calendar.SECOND) + " " + ", numeroRegistros= " + numeroRegistros + "]";
 	}
 
 	@Override
