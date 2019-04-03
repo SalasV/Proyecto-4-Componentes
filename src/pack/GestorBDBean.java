@@ -1,5 +1,8 @@
 package pack;
 
+import java.beans.PropertyChangeEvent;
+import java.beans.PropertyChangeListener;
+import java.beans.PropertyChangeSupport;
 import java.io.Serializable;
 import java.sql.Connection;
 import java.sql.DriverManager;
@@ -20,18 +23,20 @@ public class GestorBDBean implements Serializable {
 	private ResultSet resultset;
 	private RegistroBD registro;
 	private ArrayList<RegistroBD> registros = new ArrayList<>();
+	PropertyChangeSupport evento;
 
 	public GestorBDBean() {
-
+		evento = new PropertyChangeSupport(this);
 	}
 
 	private void conexion(String ip, String bd, String usuario, String contraseña) {
+
 		this.ip = ip;
 		this.bd = bd;
 		this.usuario = usuario;
 		this.contraseña = contraseña;
 		try {
-			if(connection!=null) {
+			if (connection != null) {
 				desconexion();
 			}
 			Class.forName("com.mysql.jdbc.Driver");
@@ -42,6 +47,7 @@ public class GestorBDBean implements Serializable {
 	}
 
 	private void desconexion() {
+
 		try {
 			resultset.close();
 			statement.close();
@@ -53,6 +59,8 @@ public class GestorBDBean implements Serializable {
 
 	public void select(String consulta) {
 		try {
+
+			evento.firePropertyChange("select", null, new RegistroBD());
 			registro = new RegistroBD();
 			statement = connection.createStatement();
 			resultset = statement.executeQuery(consulta);
@@ -60,21 +68,20 @@ public class GestorBDBean implements Serializable {
 			while (resultset.next()) {
 				count++;
 			}
-			
+
 			registro.setBd(this.bd);
 			registro.setUsuario(this.usuario);
 			registro.setTipoConsulta("SELECT");
 			registro.setSentencia(consulta);
 			registro.setNumeroRegistros(count);
 			registro.setFechaConsulta(Calendar.getInstance());
-			
+
 			registros.add(registro);
-			
+
 			for (RegistroBD registroBD : registros) {
-					System.out.println(registroBD.toString());
+				System.out.println(registroBD.toString());
 			}
-			
-			
+
 		} catch (SQLException e) {
 			e.printStackTrace();
 		}
@@ -83,16 +90,14 @@ public class GestorBDBean implements Serializable {
 	public void delete(String consulta) {
 		try {
 			statement = connection.createStatement();
-
 			int numRegistros = statement.executeUpdate(consulta);
-
 			registro.setUsuario(this.usuario);
 			registro.setTipoConsulta("DELETE");
 			registro.setSentencia(consulta);
 			registro.setNumeroRegistros(numRegistros);
 			registro.setFechaConsulta(Calendar.getInstance());
 
-			registros.add(registro);
+			evento.firePropertyChange("delete", null, registro);
 		} catch (SQLException e) {
 			e.printStackTrace();
 		}
@@ -100,9 +105,9 @@ public class GestorBDBean implements Serializable {
 
 	public void insert(String consulta) {
 		try {
+
 			statement = connection.createStatement();
 			statement.executeUpdate(consulta);
-
 			registro.setUsuario(this.usuario);
 			registro.setTipoConsulta("INSERT");
 			registro.setSentencia(consulta);
@@ -160,17 +165,28 @@ public class GestorBDBean implements Serializable {
 
 	public static void main(String[] args) {
 		GestorBDBean db = new GestorBDBean();
+
+		Evento evt = new Evento();
+
+		db.addPropertyChangeListener(evt);
+
 		db.conexion("localhost", "scrumprojectmanager", "root", "");
 		db.select("select * from users");
 
 		db.conexion("localhost", "bd_institut", "root", "");
 		db.select("select * from alumnos");
 
-		
-		
-		//db.consultar("bd_institut", "SELECT");
-		//db.consultar("scrumprojectmanager", "SELECT");
-		
-		//db.consultar("scrumprojectmanager","root", "SELECT");
+		// db.consultar("bd_institut", "SELECT");
+		// db.consultar("scrumprojectmanager", "SELECT");
+
+		// db.consultar("scrumprojectmanager","root", "SELECT");
+	}
+
+	public void addPropertyChangeListener(PropertyChangeListener listener) {
+		evento.addPropertyChangeListener(listener);
+	}
+
+	public void removePropertyChangeListener(PropertyChangeListener listener) {
+		evento.removePropertyChangeListener(listener);
 	}
 }

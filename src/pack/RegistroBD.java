@@ -1,12 +1,8 @@
 package pack;
 
-import java.beans.PropertyChangeEvent;
-import java.beans.PropertyChangeListener;
-import java.io.Serializable;
 import java.util.Calendar;
-import java.util.Date;
 
-public class RegistroBD implements PropertyChangeListener {
+public class RegistroBD {
 
 	private String bd;
 	private String usuario;
@@ -88,8 +84,5 @@ public class RegistroBD implements PropertyChangeListener {
 				+ fechaConsulta.get(Calendar.SECOND) + " " + ", numeroRegistros= " + numeroRegistros + "]";
 	}
 
-	@Override
-	public void propertyChange(PropertyChangeEvent evt) {
-
-	}
+	
 }
