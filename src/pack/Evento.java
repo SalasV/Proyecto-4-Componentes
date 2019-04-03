@@ -6,12 +6,29 @@ import java.util.ArrayList;
 
 public class Evento implements PropertyChangeListener {
 
-	ArrayList<RegistroBD> log = new ArrayList<>();
+	private ArrayList<RegistroBD> log = new ArrayList<>();
 	
 	@Override
 	public void propertyChange(PropertyChangeEvent evt) {
-		// TODO Auto-generated method stub
 		log.add((RegistroBD) evt.getNewValue());
 	}
+
+	public ArrayList<RegistroBD> getLog() {
+		return log;
+	}
+
+	public void setLog(ArrayList<RegistroBD> log) {
+		this.log = log;
+	}
+	
+	public RegistroBD getLog(int i) {
+		return log.get(i);
+	}
+
+	public void setLog(RegistroBD registro,int i) {
+		this.log.set(i, registro);
+	}
+	
+	
 
 }

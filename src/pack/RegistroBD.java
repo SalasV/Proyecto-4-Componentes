@@ -75,13 +75,17 @@ public class RegistroBD {
 		this.numeroRegistros = numeroRegistros;
 	}
 
+	public String getFecha() {
+		return fechaConsulta.get(Calendar.DAY_OF_MONTH) + "/"
+				+ fechaConsulta.get(Calendar.MONTH) + "/" + fechaConsulta.get(Calendar.YEAR) + " "
+				+ fechaConsulta.get(Calendar.HOUR_OF_DAY) + ":" + fechaConsulta.get(Calendar.MINUTE) + ":"
+				+ fechaConsulta.get(Calendar.SECOND);
+	}
+	
 	@Override
 	public String toString() {
 		return "RegistroBD [database= "+bd+", usuario= " + usuario + ", tipoConsulta= " + tipoConsulta + ", sentencia= " + sentencia
-				+ ", fechaConsulta= " + fechaConsulta.get(Calendar.DAY_OF_MONTH) + "/"
-				+ fechaConsulta.get(Calendar.MONTH) + "/" + fechaConsulta.get(Calendar.YEAR) + " "
-				+ fechaConsulta.get(Calendar.HOUR_OF_DAY) + ":" + fechaConsulta.get(Calendar.MINUTE) + ":"
-				+ fechaConsulta.get(Calendar.SECOND) + " " + ", numeroRegistros= " + numeroRegistros + "]";
+				+ ", fechaConsulta= " + getFecha() + " " + ", numeroRegistros= " + numeroRegistros + "]";
 	}
 
 	

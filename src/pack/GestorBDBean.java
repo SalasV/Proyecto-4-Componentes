@@ -21,12 +21,12 @@ public class GestorBDBean implements Serializable {
 	private Connection connection;
 	private Statement statement;
 	private ResultSet resultset;
-	private RegistroBD registro;
-	private ArrayList<RegistroBD> registros = new ArrayList<>();
-	PropertyChangeSupport evento;
+	private static Evento evt;
+	private PropertyChangeSupport evento;
 
 	public GestorBDBean() {
 		evento = new PropertyChangeSupport(this);
+		evt = new Evento();
 	}
 
 	private void conexion(String ip, String bd, String usuario, String contraseña) {
@@ -59,9 +59,8 @@ public class GestorBDBean implements Serializable {
 
 	public void select(String consulta) {
 		try {
+			RegistroBD registro = new RegistroBD();
 
-			evento.firePropertyChange("select", null, new RegistroBD());
-			registro = new RegistroBD();
 			statement = connection.createStatement();
 			resultset = statement.executeQuery(consulta);
 			int count = 0;
@@ -76,11 +75,7 @@ public class GestorBDBean implements Serializable {
 			registro.setNumeroRegistros(count);
 			registro.setFechaConsulta(Calendar.getInstance());
 
-			registros.add(registro);
-
-			for (RegistroBD registroBD : registros) {
-				System.out.println(registroBD.toString());
-			}
+			evento.firePropertyChange("SELECT", null, registro);
 
 		} catch (SQLException e) {
 			e.printStackTrace();
@@ -89,6 +84,8 @@ public class GestorBDBean implements Serializable {
 
 	public void delete(String consulta) {
 		try {
+			RegistroBD registro = new RegistroBD();
+
 			statement = connection.createStatement();
 			int numRegistros = statement.executeUpdate(consulta);
 			registro.setUsuario(this.usuario);
@@ -97,7 +94,7 @@ public class GestorBDBean implements Serializable {
 			registro.setNumeroRegistros(numRegistros);
 			registro.setFechaConsulta(Calendar.getInstance());
 
-			evento.firePropertyChange("delete", null, registro);
+			evento.firePropertyChange("DELETE", null, registro);
 		} catch (SQLException e) {
 			e.printStackTrace();
 		}
@@ -105,6 +102,7 @@ public class GestorBDBean implements Serializable {
 
 	public void insert(String consulta) {
 		try {
+			RegistroBD registro = new RegistroBD();
 
 			statement = connection.createStatement();
 			statement.executeUpdate(consulta);
@@ -114,7 +112,7 @@ public class GestorBDBean implements Serializable {
 			registro.setNumeroRegistros(1);
 			registro.setFechaConsulta(Calendar.getInstance());
 
-			registros.add(registro);
+			evento.firePropertyChange("INSERT", null, registro);
 		} catch (SQLException e) {
 			e.printStackTrace();
 		}
@@ -122,6 +120,8 @@ public class GestorBDBean implements Serializable {
 
 	public void update(String consulta) {
 		try {
+			RegistroBD registro = new RegistroBD();
+
 			statement = connection.createStatement();
 
 			int numRegistros = statement.executeUpdate(consulta);
@@ -132,54 +132,36 @@ public class GestorBDBean implements Serializable {
 			registro.setNumeroRegistros(numRegistros);
 			registro.setFechaConsulta(Calendar.getInstance());
 
-			registros.add(registro);
+			evento.firePropertyChange("UPDATE", null, registro);
 		} catch (SQLException e) {
 			e.printStackTrace();
 		}
 	}
+	
 
 	public void consultar(String db, String dato) {
 		if (dato.equals("SELECT") || dato.equals("DELETE") || dato.equals("UPDATE") || dato.equals("INSERT")) {
-			for (RegistroBD registroBD : registros) {
+			for (RegistroBD registroBD : evt.getLog()) {
 				if (registroBD.getBd().equals(db) && registroBD.getTipoConsulta().equals(dato)) {
-					System.out.println(registroBD.toString());
+					System.out.println(registroBD.getSentencia()+" - "+registroBD.getFecha()+" - "+registroBD.getUsuario());
 				}
 			}
 		} else {
-			for (RegistroBD registroBD : registros) {
+			for (RegistroBD registroBD : evt.getLog()) {
 				if (registroBD.getBd().equals(db) && registroBD.getUsuario().equals(dato)) {
-					System.out.println(registroBD.toString());
+					System.out.println(registroBD.getSentencia()+" - "+registroBD.getFecha()+" - "+registroBD.getTipoConsulta());
 				}
 			}
 		}
 	}
 
 	public void consultar(String db, String usuario, String tipoConsulta) {
-		for (RegistroBD registroBD : registros) {
+		for (RegistroBD registroBD : evt.getLog()) {
 			if (registroBD.getBd().equals(db) && registroBD.getUsuario().equals(usuario)
 					&& registroBD.getTipoConsulta().equals(tipoConsulta)) {
-				System.out.println(registroBD.toString());
+				System.out.println(registroBD.getSentencia()+" - "+registroBD.getFecha());
 			}
 		}
-	}
-
-	public static void main(String[] args) {
-		GestorBDBean db = new GestorBDBean();
-
-		Evento evt = new Evento();
-
-		db.addPropertyChangeListener(evt);
-
-		db.conexion("localhost", "scrumprojectmanager", "root", "");
-		db.select("select * from users");
-
-		db.conexion("localhost", "bd_institut", "root", "");
-		db.select("select * from alumnos");
-
-		// db.consultar("bd_institut", "SELECT");
-		// db.consultar("scrumprojectmanager", "SELECT");
-
-		// db.consultar("scrumprojectmanager","root", "SELECT");
 	}
 
 	public void addPropertyChangeListener(PropertyChangeListener listener) {
@@ -189,4 +171,23 @@ public class GestorBDBean implements Serializable {
 	public void removePropertyChangeListener(PropertyChangeListener listener) {
 		evento.removePropertyChangeListener(listener);
 	}
+	
+
+	public static void main(String[] args) {
+		GestorBDBean db = new GestorBDBean();
+
+		db.addPropertyChangeListener(evt);
+
+		db.conexion("localhost", "scrumprojectmanager", "root", "");
+		db.select("select * from users");
+
+		db.conexion("localhost", "bd_institut", "root", "");
+		db.select("select * from alumnos");
+
+		db.consultar("bd_institut", "SELECT");
+		db.consultar("scrumprojectmanager", "SELECT");
+
+		db.consultar("scrumprojectmanager","root", "SELECT");
+	}
+
 }
