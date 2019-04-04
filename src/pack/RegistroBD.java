@@ -25,8 +25,6 @@ public class RegistroBD {
 		this.numeroRegistros = numeroRegistros;
 	}
 	
-	
-
 	public String getBd() {
 		return bd;
 	}

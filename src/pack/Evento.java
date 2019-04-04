@@ -29,6 +29,4 @@ public class Evento implements PropertyChangeListener {
 		this.log.set(i, registro);
 	}
 	
-	
-
 }

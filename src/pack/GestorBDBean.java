@@ -1,6 +1,5 @@
 package pack;
 
-import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeSupport;
 import java.io.Serializable;
@@ -9,7 +8,6 @@ import java.sql.DriverManager;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
-import java.util.ArrayList;
 import java.util.Calendar;
 
 public class GestorBDBean implements Serializable {
@@ -27,10 +25,10 @@ public class GestorBDBean implements Serializable {
 	public GestorBDBean() {
 		evento = new PropertyChangeSupport(this);
 		evt = new Evento();
+		addPropertyChangeListener(evt);
 	}
 
-	private void conexion(String ip, String bd, String usuario, String contraseña) {
-
+	public void conexion(String ip, String bd, String usuario, String contraseña) {
 		this.ip = ip;
 		this.bd = bd;
 		this.usuario = usuario;
@@ -67,14 +65,12 @@ public class GestorBDBean implements Serializable {
 			while (resultset.next()) {
 				count++;
 			}
-
 			registro.setBd(this.bd);
 			registro.setUsuario(this.usuario);
 			registro.setTipoConsulta("SELECT");
 			registro.setSentencia(consulta);
 			registro.setNumeroRegistros(count);
 			registro.setFechaConsulta(Calendar.getInstance());
-
 			evento.firePropertyChange("SELECT", null, registro);
 
 		} catch (SQLException e) {
@@ -88,6 +84,7 @@ public class GestorBDBean implements Serializable {
 
 			statement = connection.createStatement();
 			int numRegistros = statement.executeUpdate(consulta);
+			registro.setBd(this.bd);
 			registro.setUsuario(this.usuario);
 			registro.setTipoConsulta("DELETE");
 			registro.setSentencia(consulta);
@@ -106,6 +103,7 @@ public class GestorBDBean implements Serializable {
 
 			statement = connection.createStatement();
 			statement.executeUpdate(consulta);
+			registro.setBd(this.bd);
 			registro.setUsuario(this.usuario);
 			registro.setTipoConsulta("INSERT");
 			registro.setSentencia(consulta);
@@ -126,6 +124,7 @@ public class GestorBDBean implements Serializable {
 
 			int numRegistros = statement.executeUpdate(consulta);
 
+			registro.setBd(this.bd);
 			registro.setUsuario(this.usuario);
 			registro.setTipoConsulta("UPDATE");
 			registro.setSentencia(consulta);
@@ -137,19 +136,20 @@ public class GestorBDBean implements Serializable {
 			e.printStackTrace();
 		}
 	}
-	
 
 	public void consultar(String db, String dato) {
 		if (dato.equals("SELECT") || dato.equals("DELETE") || dato.equals("UPDATE") || dato.equals("INSERT")) {
 			for (RegistroBD registroBD : evt.getLog()) {
 				if (registroBD.getBd().equals(db) && registroBD.getTipoConsulta().equals(dato)) {
-					System.out.println(registroBD.getSentencia()+" - "+registroBD.getFecha()+" - "+registroBD.getUsuario());
+					System.out.println(registroBD.getSentencia() + " - " + registroBD.getFecha() + " - "
+							+ registroBD.getUsuario());
 				}
 			}
 		} else {
 			for (RegistroBD registroBD : evt.getLog()) {
 				if (registroBD.getBd().equals(db) && registroBD.getUsuario().equals(dato)) {
-					System.out.println(registroBD.getSentencia()+" - "+registroBD.getFecha()+" - "+registroBD.getTipoConsulta());
+					System.out.println(registroBD.getSentencia() + " - " + registroBD.getFecha() + " - "
+							+ registroBD.getTipoConsulta());
 				}
 			}
 		}
@@ -159,7 +159,7 @@ public class GestorBDBean implements Serializable {
 		for (RegistroBD registroBD : evt.getLog()) {
 			if (registroBD.getBd().equals(db) && registroBD.getUsuario().equals(usuario)
 					&& registroBD.getTipoConsulta().equals(tipoConsulta)) {
-				System.out.println(registroBD.getSentencia()+" - "+registroBD.getFecha());
+				System.out.println(registroBD.getSentencia() + " - " + registroBD.getFecha());
 			}
 		}
 	}
@@ -170,24 +170,6 @@ public class GestorBDBean implements Serializable {
 
 	public void removePropertyChangeListener(PropertyChangeListener listener) {
 		evento.removePropertyChangeListener(listener);
-	}
-	
-
-	public static void main(String[] args) {
-		GestorBDBean db = new GestorBDBean();
-
-		db.addPropertyChangeListener(evt);
-
-		db.conexion("localhost", "scrumprojectmanager", "root", "");
-		db.select("select * from users");
-
-		db.conexion("localhost", "bd_institut", "root", "");
-		db.select("select * from alumnos");
-
-		db.consultar("bd_institut", "SELECT");
-		db.consultar("scrumprojectmanager", "SELECT");
-
-		db.consultar("scrumprojectmanager","root", "SELECT");
 	}
 
 }
